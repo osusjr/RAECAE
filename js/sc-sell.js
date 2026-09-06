@@ -389,6 +389,7 @@ function readForm(form) {
   };
 }
 
+// Publishing requires the whole form filled in; only drafts may be partial.
 function validate(data, { draft }) {
   const problems = [];
   if (!data.title) problems.push('Add a model or description so buyers can find it.');
@@ -396,8 +397,14 @@ function validate(data, { draft }) {
     if (!data.brand_id && !data.custom_brand) problems.push('Choose a brand — or type it if it is not in the list.');
     if (!data.category_id) problems.push('Choose a category.');
     if (!data.condition_code) problems.push('Choose a condition.');
+    if (!data.size_label) problems.push('Add the size as marked on the item.');
+    if (!data.color) problems.push('Pick a colour.');
+    if (!data.description) problems.push('Tell buyers a little more in the description.');
     if (!data.price || data.price <= 0) problems.push('Set an asking price.');
+    if (!data.original_retail) problems.push('Add the original retail price.');
     if (!files.has('front')) problems.push('Add the front photo.');
+    if (!files.has('back')) problems.push('Add the back photo.');
+    if (!files.has('detail')) problems.push('Add the detail photo.');
     if (!files.has('label')) problems.push('Add the label photo — authentication starts from it.');
   }
   return problems;
