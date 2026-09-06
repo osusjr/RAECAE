@@ -54,10 +54,8 @@ const AR = {
   'Brands': 'الماركات',
 
   // --- homepage ----------------------------------------------------------
-  'Buy and sell pre-owned luxury in Jordan.': 'بيع واشترِ قطع الفخامة المستعملة في الأردن.',
-  'Every piece over JOD 350 is authenticated by our experts before it reaches you.':
-    'كل قطعة تتجاوز ٣٥٠ دينارًا يفحصها خبراؤنا قبل أن تصلك.',
-  'Every piece over JOD 350 authenticated': 'توثيق كل قطعة فوق ٣٥٠ دينارًا',
+  'A Second Chance for pieces worth finding.': 'فرصة ثانية لقطعٍ تستحق العثور عليها.',
+  'Jordan’s buy-and-sell fashion marketplace.': 'سوق الأردن لبيع وشراء الأزياء.',
   'Just listed': 'أُضيفت للتو',
   'Nothing counterfeit gets through.': 'لا مجال للتقليد.',
   'pieces authenticated': 'قطعة موثّقة',
