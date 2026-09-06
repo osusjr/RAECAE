@@ -457,8 +457,8 @@ async function notifications({ setContent, setTitle }) {
             <input class="sc-input" name="title" required maxlength="80"
                    placeholder="New drop: vintage Chanel"></div>
           <div class="sc-field"><label class="sc-label">Message</label>
-            <textarea class="sc-textarea" name="body" required maxlength="300"
-              placeholder="Keep it short. People read these on a phone."></textarea></div>
+            <textarea class="sc-textarea" name="body" required rows="6"
+              placeholder="This is sent by email, so write as much as the message needs."></textarea></div>
           <div class="sc-field"><label class="sc-label">Links to <span class="sc-muted sc-xs">optional</span></label>
             <input class="sc-input" name="link" placeholder="catalog-bags.html"></div>
           <div class="sc-note sc-note-warn">

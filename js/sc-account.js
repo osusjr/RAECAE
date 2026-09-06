@@ -626,13 +626,13 @@ async function editListing(id) {
           </select></div>
         <div class="sc-field"><label class="sc-label">Asking price</label>
           <input class="sc-input" name="price" inputmode="decimal" required value="${esc(l.price ?? '')}"></div>
-        <div class="sc-field"><label class="sc-label">Original retail <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Original retail</label>
           <input class="sc-input" name="original_retail" inputmode="decimal" value="${esc(l.original_retail ?? '')}"></div>
-        <div class="sc-field"><label class="sc-label">Size <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Size</label>
           <input class="sc-input" name="size_label" value="${esc(l.size_label || '')}"></div>
-        <div class="sc-field"><label class="sc-label">Colour <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Colour</label>
           ${colourField}</div>
-        <div class="sc-field"><label class="sc-label">Notes for buyers <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Notes for buyers</label>
           <textarea class="sc-textarea" name="description">${esc(l.description || '')}</textarea></div>
       </form>`,
     actions: [{ label: 'Cancel', value: false }, { label: 'Save changes', value: true, kind: 'sc-btn-primary' }],
@@ -714,6 +714,13 @@ async function editListing(id) {
   const price = parseFloat(String(v.price).replace(/[^\d.]/g, ''));
   if (!v.title?.trim()) return toast('The listing needs a title.', 'danger');
   if (!price || price <= 0) return toast('Set a valid asking price.', 'danger');
+  // Everything on a listing is required, matching the sell form.
+  if (!v.condition_code) return toast('Choose a condition.', 'danger');
+  if (!v.size_label?.trim()) return toast('Add the size as marked on the item.', 'danger');
+  if (!v.color?.trim()) return toast('Pick a colour.', 'danger');
+  if (!v.description?.trim()) return toast('Tell buyers a little more in the notes.', 'danger');
+  if (!parseFloat(String(v.original_retail).replace(/[^\d.]/g, '')))
+    return toast('Add the original retail price.', 'danger');
   if (images.filter(i => i.slot !== 'video' && !removals.has(i.id)).length
       + additions.filter(a => !a.isVideo).length === 0)
     return toast('Keep at least one photo on the listing.', 'danger');
