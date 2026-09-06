@@ -379,12 +379,16 @@ export const USERNAME_RULE = 'Usernames are 3-20 characters — letters, numbers
 // Phone keyboards insert ™ in its emoji form — the character followed by an
 // invisible variation selector — which would fail the rule above. Strip the
 // selectors (and stray whitespace) before validating or saving.
-// A username may not simply be the person's name — compare ignoring case
-// and spacing ("Raya Shobaki" vs "rayashobaki" vs "raya").
+// A username may not simply be the person's name — not the full name run
+// together ("Raya Shobaki" vs "rayashobaki") and not any single part of it
+// ("raya", "shobaki"). Compare ignoring case and spacing.
 export function usernameTooSimilar(username, fullName) {
   const norm = s => String(s || '').toLowerCase().replace(/[\s\u{FE0E}\u{FE0F}]+/gu, '');
-  const u = norm(username), n = norm(fullName);
-  return !!u && !!n && u === n;
+  const u = norm(username);
+  if (!u) return false;
+  const name = String(fullName || '').toLowerCase();
+  const candidates = [norm(name), ...name.split(/\s+/).map(norm)];
+  return candidates.some(c => !!c && c === u);
 }
 
 export function cleanUsername(u) {
@@ -398,7 +402,7 @@ export function errorMessage(error) {
   if (/duplicate key.*admin_users/i.test(msg)) return 'They are already an admin — use “Change role” on their row instead.';
   if (/duplicate key/i.test(msg)) return 'That already exists.';
   if (/row-level security|not authorised|Not authorised/i.test(msg)) return 'You do not have permission to do that.';
-  if (/Invalid login credentials/i.test(msg)) return 'That email and password do not match.';
+  if (/Invalid login credentials/i.test(msg)) return 'We could not find an account matching those details. Check for typos, or create an account.';
   if (/Email not confirmed/i.test(msg)) return 'Confirm your email address first — check your inbox.';
   if (/User already registered/i.test(msg)) return 'An account with that email already exists.';
   if (/Password should be/i.test(msg)) return 'Use a password of at least 8 characters.';

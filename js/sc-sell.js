@@ -39,7 +39,7 @@ async function vetMedia(file, isVideo) {
   return processed;
 }
 let settings = null;
-let taxonomy = { brands: [], categories: [], conditions: [] };
+let taxonomy = { brands: [], categories: [], conditions: [], colors: [] };
 
 const CONDITION_BY_LABEL = {
   'New with tags': 'new_with_tags',
@@ -89,16 +89,20 @@ function showSignInGate(form) {
 }
 
 async function loadTaxonomy() {
-  const [brands, categories, conditions] = await Promise.all([
+  const [brands, categories, conditions, colors] = await Promise.all([
     sb.from('brands').select('id,name,slug').eq('is_active', true).order('sort_order'),
     sb.from('categories').select('id,name,slug').eq('is_active', true).order('sort_order'),
     sb.from('conditions').select('code,label').eq('is_active', true).order('sort_order'),
+    sb.from('colors').select('name').eq('is_active', true).order('sort_order'),
   ]);
   if (brands.error || categories.error || conditions.error) return false;
   taxonomy = {
     brands: brands.data || [],
     categories: categories.data || [],
     conditions: conditions.data || [],
+    // Colour is optional, so a failed colours query keeps the free-text field
+    // instead of locking the whole form.
+    colors: colors.error ? [] : (colors.data || []),
   };
 
   // Replace the hard-coded suggestion lists with what is actually in the database.
@@ -113,6 +117,21 @@ async function loadTaxonomy() {
   if (catSelect && taxonomy.categories.length) {
     catSelect.innerHTML = '<option value="">Choose one</option>' +
       taxonomy.categories.map(c => `<option value="${c.id}">${esc(c.name)}</option>`).join('');
+  }
+
+  // The colour field ships as free text; with the list loaded it becomes a
+  // dropdown so colours stay consistent and filterable.
+  const colourInput = document.getElementById('colour');
+  if (colourInput && colourInput.tagName === 'INPUT' && taxonomy.colors.length) {
+    const select = document.createElement('select');
+    select.id = 'colour';
+    select.name = 'colour';
+    select.className = colourInput.className;
+    select.innerHTML = '<option value="">Choose one</option>' +
+      taxonomy.colors.map(c => `<option value="${esc(c.name)}">${esc(c.name)}</option>`).join('');
+    const hint = colourInput.parentElement?.querySelector('p');
+    if (hint) hint.textContent = 'Pick the closest match.';
+    colourInput.replaceWith(select);
   }
   return taxonomy.categories.length > 0;
 }
@@ -160,6 +179,10 @@ function enableForm(form) {
 // ---------------------------------------------------------------------------
 // Photos — turn the four static tiles into upload targets
 // ---------------------------------------------------------------------------
+const tileBySlot = new Map();     // slot key -> tile element
+const specBySlot = new Map();     // slot key -> slot spec
+let swapFrom = null;              // slot armed for a swap, or null
+
 function buildPhotoTiles(form) {
   const tiles = [...form.querySelectorAll('div[class*="aspect-square"]')].slice(0, ALL_SLOTS.length);
   if (!tiles.length) return;
@@ -171,6 +194,8 @@ function buildPhotoTiles(form) {
     tile.style.position = 'relative';
     tile.style.cursor = 'pointer';
     tile.dataset.slot = spec.slot;
+    tileBySlot.set(spec.slot, tile);
+    specBySlot.set(spec.slot, spec);
 
     const input = document.createElement('input');
     input.type = 'file';
@@ -182,11 +207,27 @@ function buildPhotoTiles(form) {
     });
     tile.appendChild(input);
 
+    // While a swap is armed, a tap on any other photo tile completes the swap
+    // instead of opening the file picker. Capture phase so it runs before the
+    // input's default; preventDefault keeps the picker shut.
+    tile.addEventListener('click', e => {
+      if (!swapFrom) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (spec.slot === 'video' || swapFrom === 'video') {
+        toast('The video stays in its own box — swapping only works between photos.', 'danger');
+        disarmSwap();
+        return;
+      }
+      if (swapFrom === spec.slot) { disarmSwap(); return; }
+      performSwap(swapFrom, spec.slot);
+    }, true);
+
     input.addEventListener('change', async () => {
       const file = input.files?.[0];
       if (!file) return;
       const vetted = await vetMedia(file, isVideo);
-      if (vetted) await attachPhoto(tile, spec, vetted);
+      if (vetted) attachPhoto(tile, spec, vetted);
     });
 
     tile.addEventListener('dragover', e => { e.preventDefault(); tile.style.borderColor = 'var(--color-accent)'; });
@@ -197,37 +238,83 @@ function buildPhotoTiles(form) {
       const file = e.dataTransfer.files?.[0];
       if (!file) return;
       const vetted = await vetMedia(file, isVideo);
-      if (vetted) await attachPhoto(tile, spec, vetted);
+      if (vetted) attachPhoto(tile, spec, vetted);
     });
   });
 }
 
-async function attachPhoto(tile, spec, file) {
+function disarmSwap() {
+  if (swapFrom) tileBySlot.get(swapFrom)?.style.removeProperty('outline');
+  swapFrom = null;
+}
+
+function performSwap(a, b) {
+  const fa = files.get(a), fb = files.get(b);
+  if (fa) files.set(b, fa); else files.delete(b);
+  if (fb) files.set(a, fb); else files.delete(a);
+  disarmSwap();
+  renderPreview(a);
+  renderPreview(b);
+}
+
+function attachPhoto(tile, spec, file) {
   files.set(spec.slot, file);
+  renderPreview(spec.slot);
+}
+
+// Draw (or clear) the preview for a slot from whatever is in `files`.
+function renderPreview(slot) {
+  const tile = tileBySlot.get(slot);
+  const spec = specBySlot.get(slot);
+  if (!tile || !spec) return;
 
   tile.querySelector('[data-preview]')?.remove();
+  const input = tile.querySelector('input[type=file]');
+  if (input) input.value = '';
+
+  const file = files.get(slot);
+  if (!file) return;
+
   const preview = document.createElement('div');
   preview.setAttribute('data-preview', '');
-  Object.assign(preview.style, { position: 'absolute', inset: '0', zIndex: '2' });
+  // Above the invisible file input so its buttons actually receive taps;
+  // the container itself lets clicks fall through, so tapping the picture
+  // still opens the picker to replace it.
+  Object.assign(preview.style, { position: 'absolute', inset: '0', zIndex: '4', pointerEvents: 'none' });
+  const url = URL.createObjectURL(file);
   const mediaTag = file.type.startsWith('video/')
-    ? `<video src="${URL.createObjectURL(file)}" muted playsinline
+    ? `<video src="${url}" muted playsinline
          style="width:100%;height:100%;object-fit:cover;border-radius:inherit"></video>`
-    : `<img src="${URL.createObjectURL(file)}" alt="${esc(spec.label)}"
+    : `<img src="${url}" alt="${esc(spec.label)}"
          style="width:100%;height:100%;object-fit:cover;border-radius:inherit">`;
+  const btnStyle = 'width:30px;height:30px;border:0;border-radius:999px;background:rgba(16,17,20,.78);'
+    + 'color:#fff;cursor:pointer;font-size:15px;line-height:1;pointer-events:auto;display:grid;place-items:center';
   preview.innerHTML = `
     ${mediaTag}
-    <button type="button" data-clear aria-label="Remove ${esc(spec.label)} photo"
-      style="position:absolute;top:8px;right:8px;width:26px;height:26px;border:0;border-radius:999px;
-             background:rgba(16,17,20,.72);color:#fff;cursor:pointer;font-size:14px;line-height:1;z-index:4">✕</button>
+    <button type="button" data-clear aria-label="Remove ${esc(spec.label)} ${slot === 'video' ? 'video' : 'photo'}"
+      style="position:absolute;top:8px;right:8px;${btnStyle}">✕</button>
+    ${slot === 'video' ? '' : `
+    <button type="button" data-swap aria-label="Swap ${esc(spec.label)} photo with another box"
+      style="position:absolute;top:8px;left:8px;${btnStyle}">⇄</button>`}
     <span style="position:absolute;left:8px;bottom:8px;background:rgba(16,17,20,.72);color:#fff;
                  font-size:10px;padding:2px 7px;border-radius:999px">${esc(spec.label)}</span>`;
 
   preview.querySelector('[data-clear]').addEventListener('click', e => {
+    e.preventDefault();
     e.stopPropagation();
-    files.delete(spec.slot);
-    preview.remove();
-    const input = tile.querySelector('input[type=file]');
-    if (input) input.value = '';
+    disarmSwap();
+    files.delete(slot);
+    renderPreview(slot);
+  });
+
+  preview.querySelector('[data-swap]')?.addEventListener('click', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (swapFrom === slot) { disarmSwap(); return; }
+    if (swapFrom) { performSwap(swapFrom, slot); return; }
+    swapFrom = slot;
+    tile.style.outline = '2px solid var(--color-accent)';
+    toast('Now tap the photo to swap it with. Tap ⇄ again to cancel.');
   });
 
   tile.appendChild(preview);
@@ -269,7 +356,7 @@ function wirePayoutPreview(form) {
       <p class="sc-eyebrow">On this price</p>
       <dl class="sc-kv" style="margin-top:10px">
         <dt>Buyer pays</dt><dd class="sc-money">${money(value, settings.currency)}</dd>
-        <dt>Commission (${(rate * 100).toFixed(0)}%)</dt><dd class="sc-money">− ${money(commission, settings.currency)}</dd>
+        <dt>Platform fee (${(rate * 100).toFixed(0)}%)</dt><dd class="sc-money">− ${money(commission, settings.currency)}</dd>
         <dt>You receive</dt><dd class="sc-money-lg" style="color:var(--color-accent)">${money(takeHome, settings.currency)}</dd>
       </dl>
       <p class="sc-hint" style="margin-top:10px">${needsAuth
@@ -302,6 +389,7 @@ function readForm(form) {
   };
 }
 
+// Publishing requires the whole form filled in; only drafts may be partial.
 function validate(data, { draft }) {
   const problems = [];
   if (!data.title) problems.push('Add a model or description so buyers can find it.');
@@ -309,8 +397,14 @@ function validate(data, { draft }) {
     if (!data.brand_id && !data.custom_brand) problems.push('Choose a brand — or type it if it is not in the list.');
     if (!data.category_id) problems.push('Choose a category.');
     if (!data.condition_code) problems.push('Choose a condition.');
+    if (!data.size_label) problems.push('Add the size as marked on the item.');
+    if (!data.color) problems.push('Pick a colour.');
+    if (!data.description) problems.push('Tell buyers a little more in the description.');
     if (!data.price || data.price <= 0) problems.push('Set an asking price.');
+    if (!data.original_retail) problems.push('Add the original retail price.');
     if (!files.has('front')) problems.push('Add the front photo.');
+    if (!files.has('back')) problems.push('Add the back photo.');
+    if (!files.has('detail')) problems.push('Add the detail photo.');
     if (!files.has('label')) problems.push('Add the label photo — authentication starts from it.');
   }
   return problems;

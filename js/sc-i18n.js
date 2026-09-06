@@ -140,6 +140,16 @@ const AR = {
   'Original retail': 'سعر التجزئة الأصلي',
   'What you take home': 'ما ستحصل عليه',
   'Commission': 'العمولة',
+  'Platform fee': 'رسوم المنصة',
+  'Platform fees': 'رسوم المنصة',
+  'Platform fee rate': 'نسبة رسوم المنصة',
+  'Platform fees earned': 'رسوم المنصة المحصلة',
+  'Pick the closest match.': 'اختر الأقرب.',
+  'Photos and video': 'الصور والفيديو',
+  'Add photos': 'إضافة صور',
+  'Add a video': 'إضافة فيديو',
+  'Tap ✕ to remove one. New photos upload when you save.': 'اضغط ✕ لحذف صورة. الصور الجديدة تُرفع عند الحفظ.',
+  'Show more tabs': 'عرض المزيد من التبويبات',
 
   // --- trust -------------------------------------------------------------
   'Buyer Protection': 'حماية المشتري',

@@ -151,7 +151,7 @@
 <div class="flex items-center gap-3"><span class="inline-flex size-8 items-center justify-center rounded-full bg-surface font-display text-xs font-semibold tnum">1</span>
 <h2 class="text-xl sm:text-2xl">Photos</h2>
 </div>
-<p class="mt-2 text-sm text-muted">Up to ten photos, shot in good lighting — daylight near a window works best, no flash. Four angles minimum; listings missing the label shot are held back from the feed, because authentication starts from it. You can also add one short video.</p>
+<p class="mt-2 text-sm text-muted">Up to ten photos, shot in good lighting — daylight near a window works best, no flash. Four angles minimum; listings missing the label shot are held back from the feed, because authentication starts from it. You can also add one short video. Once a photo is in, tap ✕ to remove it or ⇄ to swap it into another box.</p>
 <div class="mt-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
 <div class="flex aspect-square cursor-not-allowed flex-col items-center justify-center gap-2 rounded-(--radius-card) border border-dashed border-line bg-product p-3 text-center"><svg aria-hidden="true" class="lucide lucide-camera size-6 text-muted" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
 <path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"></path>
@@ -298,7 +298,7 @@
 <p class="mt-1.5 text-xs text-muted">We suggest a range from recent sales of the same model.</p>
 </div>
 <div class=""><label class="block text-sm font-medium" for="retail">Original retail price</label><input class="mt-2 h-11 w-full rounded-full border border-line bg-surface px-4 text-sm disabled:cursor-not-allowed" disabled="" id="retail" name="retail" type="text"/>
-<p class="mt-1.5 text-xs text-muted">Optional. Shows buyers the saving.</p>
+<p class="mt-1.5 text-xs text-muted">What it cost new. Buyers see the saving on the card.</p>
 </div>
 </div>
 </section>
@@ -318,7 +318,7 @@
 <dd>JOD 600</dd>
 </div>
 <div class="flex items-baseline justify-between gap-3">
-<dt class="text-muted">Commission (12%)</dt>
+<dt class="text-muted">Platform fee (12%)</dt>
 <dd>-<!-- -->JOD 72</dd>
 </div>
 <div class="flex items-baseline justify-between gap-3">
@@ -339,13 +339,12 @@
 <div class="rounded-(--radius-card) bg-surface p-5">
 <h2 class="text-base">After it sells</h2>
 <ul class="mt-4 space-y-4 text-sm">
-<li class="flex gap-3"><svg aria-hidden="true" class="lucide lucide-truck size-5 shrink-0 text-accent" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
-<path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"></path>
-<path d="M15 18H9"></path>
-<path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"></path>
-<circle cx="17" cy="18" r="2"></circle>
-<circle cx="7" cy="18" r="2"></circle>
-</svg><span class="text-muted">Free <!-- -->the buyer<!-- --> pickup from your address anywhere in Jordan.</span></li>
+<li class="flex gap-3"><svg aria-hidden="true" class="lucide lucide-users size-5 shrink-0 text-accent" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+<circle cx="9" cy="7" r="4"></circle>
+<path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+<path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+</svg><span class="text-muted">You and the buyer arrange the handover between you — anywhere in Jordan that suits you both.</span></li>
 <li class="flex gap-3"><svg aria-hidden="true" class="lucide lucide-badge-check size-5 shrink-0 text-accent" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
 <path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"></path>
 <path d="m9 12 2 2 4-4"></path>
@@ -414,7 +413,7 @@
 </svg></button><button class="inline-flex items-center gap-1.5 rounded-full border border-line bg-canvas px-3.5 py-2 text-xs font-medium text-ink transition-colors hover:border-ink/30" type="button">English / العربية<svg aria-hidden="true" class="lucide lucide-chevron-down size-3.5 text-muted" fill="none" height="24" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" viewbox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
 <path d="m6 9 6 6 6-6"></path>
 </svg></button></div>
-<div class="flex flex-wrap items-center gap-2"><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted" data-keep-en="">Visa</span><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted" data-keep-en="">Mastercard</span><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted" data-keep-en="">CliQ</span><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted" data-keep-en="">eFAWATEERcom</span><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">Cash on handover</span></div>
+<div class="flex flex-wrap items-center gap-2"><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted" data-keep-en="">CliQ</span><span class="rounded-full border border-line bg-canvas px-2.5 py-1 text-[10px] font-medium uppercase tracking-wide text-muted">Cash on handover</span></div>
 </div>
 <div class="flex flex-col gap-2 border-t border-line py-7 text-xs text-muted sm:flex-row sm:items-center sm:justify-between">
 <p>© 2026 <!-- -->SecondChance Collective<!-- -->. All rights reserved.</p>
