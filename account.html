@@ -15,7 +15,22 @@
   .acct-brand { font-family: var(--font-bricolage); font-size: 15px; font-weight: 600; letter-spacing: -.01em; }
   .acct-brand i { font-style: normal; color: var(--color-accent); }
   .acct-hero { padding: 26px 0 20px; }
-  .acct-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 10px; }
+  .acct-tabs-wrap { position: relative; }
+  .acct-tabs { display: flex; gap: 4px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+  .acct-tabs::-webkit-scrollbar { display: none; }
+  /* A fade plus an arrow whenever more tabs are hiding off the edge */
+  .acct-tabs-wrap.has-more::after {
+    content: ''; position: absolute; top: 0; bottom: 10px; inset-inline-end: 30px; width: 46px;
+    pointer-events: none; background: linear-gradient(to right, transparent, var(--color-canvas));
+  }
+  [dir=rtl] .acct-tabs-wrap.has-more::after { background: linear-gradient(to left, transparent, var(--color-canvas)); }
+  .acct-tabs-more {
+    position: absolute; inset-inline-end: 0; top: 0; height: calc(100% - 10px); width: 30px;
+    border: 0; border-radius: 999px; background: var(--color-surface); color: var(--color-ink);
+    font-size: 17px; line-height: 1; cursor: pointer; display: none; align-items: center; justify-content: center;
+  }
+  .acct-tabs-wrap.has-more .acct-tabs-more { display: flex; }
+  [dir=rtl] .acct-tabs-more { transform: scaleX(-1); }
   .acct-tab {
     border: 0; background: none; font: inherit; font-size: 14px; cursor: pointer;
     padding: 8px 14px; border-radius: 999px; color: var(--color-muted); white-space: nowrap;
@@ -43,7 +58,10 @@
 <div class="acct-hero" id="acct-hero">
 <div class="sc-skeleton" style="height:26px;width:220px"></div>
 </div>
+<div class="acct-tabs-wrap">
 <div class="acct-tabs" id="acct-tabs" role="tablist"></div>
+<button class="acct-tabs-more" id="acct-tabs-more" type="button" aria-label="Show more tabs">›</button>
+</div>
 </div>
 </div>
 <main class="sc-shell acct-body" id="acct-body">

@@ -314,7 +314,7 @@ async function sellers({ setContent, setTitle, setActions, ctx }) {
 
     host.innerHTML = table({
       columns: [{ label: 'Seller' }, { label: 'Live' }, { label: 'Sold' },
-                { label: 'Earnings', align: 'right' }, { label: 'Commission', align: 'right' },
+                { label: 'Earnings', align: 'right' }, { label: 'Platform fee', align: 'right' },
                 { label: 'Owed', align: 'right' }, { label: 'Standing' }, { label: '' }],
       emptyTitle: 'No sellers here yet',
       rows: withStats.map(s => `<tr>
@@ -477,7 +477,7 @@ async function openOrder(id, ctx, reload) {
             </dl>
             <hr class="sc-divider" style="margin:14px 0">
             <dl class="sc-kv">
-              <dt>Commission (${(Number(o.commission_rate) * 100).toFixed(0)}%)</dt>
+              <dt>Platform fee (${(Number(o.commission_rate) * 100).toFixed(0)}%)</dt>
               <dd class="sc-money" style="color:var(--color-accent)">${money(o.commission_amount, c)}</dd>
               <dt>Seller receives</dt><dd class="sc-money">${money(o.seller_amount, c)}</dd>
             </dl>
@@ -715,7 +715,7 @@ async function payments({ setContent, setTitle, setActions, ctx }) {
     tabs: [
       { value: 'all', label: 'Everything', active: true },
       { value: 'payment', label: 'Payments in' },
-      { value: 'commission', label: 'Commission' },
+      { value: 'commission', label: 'Platform fee' },
       { value: 'payout', label: 'Payouts' },
       { value: 'refund', label: 'Refunds' },
     ],
@@ -727,7 +727,7 @@ async function payments({ setContent, setTitle, setActions, ctx }) {
     <div class="sc-grid sc-grid-4">
       <div class="sc-stat"><span class="sc-stat-label">Gross sales</span>
         <span class="sc-stat-value">${money(stats?.total_sales, cur(ctx))}</span></div>
-      <div class="sc-stat sc-stat-accent"><span class="sc-stat-label">Commission earned</span>
+      <div class="sc-stat sc-stat-accent"><span class="sc-stat-label">Platform fees earned</span>
         <span class="sc-stat-value">${money(stats?.commission_earned, cur(ctx))}</span></div>
       <div class="sc-stat"><span class="sc-stat-label">Owed to sellers</span>
         <span class="sc-stat-value">${money(stats?.pending_payouts, cur(ctx))}</span></div>
