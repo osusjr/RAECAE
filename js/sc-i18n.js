@@ -56,7 +56,6 @@ const AR = {
   // --- homepage ----------------------------------------------------------
   'A Second Chance for pieces worth finding.': 'فرصة ثانية لقطعٍ تستحق العثور عليها.',
   'Jordan’s buy-and-sell fashion marketplace.': 'سوق الأردن لبيع وشراء الأزياء.',
-  'Every piece over JOD 350 authenticated': 'توثيق كل قطعة فوق ٣٥٠ دينارًا',
   'Just listed': 'أُضيفت للتو',
   'Nothing counterfeit gets through.': 'لا مجال للتقليد.',
   'pieces authenticated': 'قطعة موثّقة',
