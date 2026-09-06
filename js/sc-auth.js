@@ -103,7 +103,7 @@ export function initSignUp() {
     if (f.username && !USERNAME_RE.test(f.username))
       return showError(form, USERNAME_RULE);
     if (usernameTooSimilar(f.username, f.full_name))
-      return showError(form, 'Your username cannot be the same as your name — pick something distinct.');
+      return showError(form, 'Your username cannot be your first, last or full name — pick something distinct.');
     const pwProblem = passwordProblem(f.password);
     if (pwProblem) return showError(form, pwProblem);
     if (f.password !== f.confirm) return showError(form, 'The two passwords do not match.');
@@ -171,7 +171,8 @@ export function initSignIn() {
         return showError(form,
           'That email has not been confirmed yet. Ask for a code to finish setting up.');
       }
-      return showError(form, 'That email and password do not match.');
+      return showError(form,
+        'We could not find an account matching those details. Check for typos, or create an account.');
     }
 
     sb.from('login_history')

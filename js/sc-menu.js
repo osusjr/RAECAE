@@ -4,7 +4,8 @@
 // The exported markup has a hamburger button but no panel behind it: the
 // export stripped the React handlers and never emitted a drawer. This builds
 // one, wires it to the existing button, and leaves the desktop hover menus in
-// menus.js alone.
+// menus.js alone. The button sits on the left of the header, so the drawer
+// slides in from the opposite side to keep the page visible behind it.
 // ============================================================================
 
 import { sb, session, esc } from './sc-core.js';
@@ -31,11 +32,11 @@ const CSS = `
 .scm-scrim{position:fixed;inset:0;z-index:80;background:rgba(16,17,20,.42);
   opacity:0;transition:opacity .22s var(--ease-fluid,ease);backdrop-filter:blur(2px)}
 .scm-scrim.is-open{opacity:1}
-.scm{position:fixed;inset-block:0;inset-inline-start:0;z-index:81;width:min(88vw,360px);
+.scm{position:fixed;inset-block:0;inset-inline-end:0;z-index:81;width:min(88vw,360px);
   background:var(--color-canvas,#fff);display:flex;flex-direction:column;
-  transform:translateX(-100%);transition:transform .26s var(--ease-fluid,cubic-bezier(.32,.72,0,1));
+  transform:translateX(100%);transition:transform .26s var(--ease-fluid,cubic-bezier(.32,.72,0,1));
   box-shadow:0 0 44px rgba(16,17,20,.16)}
-[dir=rtl] .scm{transform:translateX(100%)}
+[dir=rtl] .scm{transform:translateX(-100%)}
 .scm.is-open{transform:translateX(0)}
 .scm-top{display:flex;align-items:center;justify-content:space-between;gap:12px;
   padding:16px 18px;border-bottom:1px solid var(--color-line,#e7e8eb);flex:0 0 auto}

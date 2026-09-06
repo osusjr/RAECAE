@@ -872,7 +872,7 @@ async function settings({ setContent, setTitle, ctx }) {
     <form class="sc-card sc-stack sc-mid" id="settings-form" style="margin:0">
       <h2 class="sc-h2">Money</h2>
       <div class="sc-grid sc-grid-2">
-        <div class="sc-field"><label class="sc-label">Commission rate</label>
+        <div class="sc-field"><label class="sc-label">Platform fee rate</label>
           <div class="sc-prefix"><span class="sc-prefix-tag">%</span>
             <input class="sc-input" name="commission_rate" type="number" step="0.1"
                    value="${(Number(s.commission_rate) * 100).toFixed(1)}"></div>

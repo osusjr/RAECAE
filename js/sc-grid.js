@@ -37,7 +37,8 @@ const card = l => {
       <p class="sc-sm sc-truncate" style="font-weight:500;margin-top:2px">${esc(l.title)}</p>
       <p class="sc-sm sc-money" style="margin-top:3px">${money(l.price, currency)}
         ${off > 0
-          ? `<span class="sc-xs" style="color:var(--sc-ok);margin-inline-start:5px">${off}% off</span>`
+          ? `<span class="sc-xs" style="color:var(--color-muted);text-decoration:line-through;margin-inline-start:5px">${money(l.original_retail, currency)}</span>
+             <span class="sc-xs" style="color:var(--sc-ok);margin-inline-start:4px">${off}% off</span>`
           : ''}</p>
       ${l.condition ? `<p class="sc-xs sc-muted" style="margin-top:2px">${esc(l.condition.label)}</p>` : ''}
     </a>

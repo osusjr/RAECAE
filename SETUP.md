@@ -54,7 +54,7 @@ Open **SQL Editor** in the Supabase dashboard. Run the files in `supabase/`
 |---|---|---|
 | 1 | `01_schema_core.sql` | Members, sellers, listings, photos, authentication, admin roles, OTP |
 | 2 | `02_schema_commerce.sql` | Orders, payments, payouts, returns, disputes, reports, content, notifications |
-| 3 | `03_functions.sql` | Commission maths, order flow, permission checks, OTP, admin reports |
+| 3 | `03_functions.sql` | Platform-fee maths, order flow, permission checks, OTP, admin reports |
 | 4 | `04_rls.sql` | Row Level Security on all 45 tables |
 | 5 | `05_storage.sql` | Photo and document buckets, with per-user access rules |
 | 6 | `06_seed.sql` | Admin roles, categories, brands, conditions, sizes, pages, FAQs |
@@ -63,6 +63,7 @@ Open **SQL Editor** in the Supabase dashboard. Run the files in `supabase/`
 | 9 | `09_email_identity.sql` | Makes email the identity; the mobile number stays as a contact field |
 | 10 | `10_fix_signup_columns.sql` | Adds the `profiles.email` column that 08/09 assumed — **sign-up fails with "Database error saving new user" until this runs** |
 | 11 | `11_brands_and_media.sql` | Typed brands on listings, 48 more seeded brands, a video slot, and the bucket config for video (50 MB) |
+| 12 | `12_copy_platform_fees.sql` | Wording refresh in seeded FAQs: "platform fee" instead of "commission", 3-day returns, CliQ + cash only |
 
 Paste the whole file each time and press **Run**. Green means it worked.
 
@@ -335,10 +336,10 @@ You can edit any role's permissions, or create your own, in **Admins & roles**.
 
 ### How the money works
 
-Commission is calculated **in the database**, never in the browser, so a modified page
-cannot change what the platform takes. The defaults match your existing copy:
+The platform fee is calculated **in the database**, never in the browser, so a modified
+page cannot change what the platform takes. The defaults match your existing copy:
 
-- 12% commission, taken from the seller
+- 12% platform fee, taken from the seller
 - Buyer Protection charged on top, paid by the buyer
 - Authentication required at JOD 350 and above
 - Payouts scheduled 3 days after the buyer accepts

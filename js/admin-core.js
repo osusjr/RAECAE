@@ -47,7 +47,7 @@ async function dashboard({ setContent, setTitle, setActions, ctx }) {
         <p class="sc-eyebrow">Money</p>
         <div class="sc-grid sc-grid-4" style="margin-top:10px">
           ${tile('Total sales', money(s.total_sales, c), `${money(s.sales_period, c)} this period`)}
-          ${tile('Commission earned', money(s.commission_earned, c), null, true)}
+          ${tile('Platform fees earned', money(s.commission_earned, c), null, true)}
           ${tile('Pending payouts', money(s.pending_payouts, c), `${num(s.payout_count)} waiting`)}
           ${tile('Average order', money(s.avg_order_value, c))}
         </div>
@@ -141,7 +141,7 @@ async function analytics({ setContent, setTitle, setActions, ctx }) {
         <div class="sc-grid sc-grid-3" style="margin-top:20px">
           <div><p class="sc-eyebrow">Total revenue</p>
             <p class="sc-money-lg">${money(monthly.reduce((a, m) => a + Number(m.revenue), 0), c)}</p></div>
-          <div><p class="sc-eyebrow">Commission</p>
+          <div><p class="sc-eyebrow">Platform fees</p>
             <p class="sc-money-lg" style="color:var(--color-accent)">${money(monthly.reduce((a, m) => a + Number(m.commission), 0), c)}</p></div>
           <div><p class="sc-eyebrow">Orders</p>
             <p class="sc-money-lg">${num(monthly.reduce((a, m) => a + Number(m.orders), 0))}</p></div>
