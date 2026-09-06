@@ -457,8 +457,8 @@ async function notifications({ setContent, setTitle }) {
             <input class="sc-input" name="title" required maxlength="80"
                    placeholder="New drop: vintage Chanel"></div>
           <div class="sc-field"><label class="sc-label">Message</label>
-            <textarea class="sc-textarea" name="body" required maxlength="300"
-              placeholder="Keep it short. People read these on a phone."></textarea></div>
+            <textarea class="sc-textarea" name="body" required rows="6"
+              placeholder="This is sent by email, so write as much as the message needs."></textarea></div>
           <div class="sc-field"><label class="sc-label">Links to <span class="sc-muted sc-xs">optional</span></label>
             <input class="sc-input" name="link" placeholder="catalog-bags.html"></div>
           <div class="sc-note sc-note-warn">
@@ -872,7 +872,7 @@ async function settings({ setContent, setTitle, ctx }) {
     <form class="sc-card sc-stack sc-mid" id="settings-form" style="margin:0">
       <h2 class="sc-h2">Money</h2>
       <div class="sc-grid sc-grid-2">
-        <div class="sc-field"><label class="sc-label">Commission rate</label>
+        <div class="sc-field"><label class="sc-label">Platform fee rate</label>
           <div class="sc-prefix"><span class="sc-prefix-tag">%</span>
             <input class="sc-input" name="commission_rate" type="number" step="0.1"
                    value="${(Number(s.commission_rate) * 100).toFixed(1)}"></div>

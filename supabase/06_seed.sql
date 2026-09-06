@@ -29,7 +29,7 @@ insert into admin_roles (key, name, description, permissions, is_system) values
  array['listings.view','listings.authenticate','users.view'], true),
 
 ('finance', 'Finance',
- 'Transactions, commission, payouts and financial reports.',
+ 'Transactions, platform fees, payouts and financial reports.',
  array['payments.view','payments.manage','payments.payouts',
        'orders.view','analytics.view','users.view'], true),
 
@@ -151,10 +151,10 @@ on conflict (key) do nothing;
 
 insert into faqs (question, answer, category, sort_order) values
 ('How does authentication work?','Anything priced over JOD 350 is collected and checked by our authenticators in Amman before it goes to the buyer.','authentication',1),
-('What does it cost to sell?','Listing is free. We take a 12% commission when the buyer accepts the item.','fees',2),
+('What does it cost to sell?','Listing is free. A 12% platform fee is deducted when the buyer accepts the item.','fees',2),
 ('How do I get paid?','Once the buyer accepts, your payout is scheduled and sent by bank transfer or CliQ.','payouts',3),
-('Can I return something?','Yes, if the item is not as described. Open a return from your order within 48 hours of delivery.','returns',4),
-('Which payment methods work?','Visa, Mastercard, CliQ, eFAWATEERcom and cash on delivery.','payments',5)
+('Can I return something?','Yes, if the item is not as described — open a return from your order within 3 days of the handover. Once you accept a piece, the sale is final.','returns',4),
+('Which payment methods work?','CliQ, or cash when you meet for the handover.','payments',5)
 on conflict do nothing;
 
 -- ---------------------------------------------------------------------------

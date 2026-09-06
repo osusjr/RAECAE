@@ -36,10 +36,8 @@ export const CITIES = [
 ];
 
 export const PAYMENT_METHODS = [
-  { value: 'card',         label: 'Card',            note: 'Visa or Mastercard' },
-  { value: 'cliq',         label: 'CliQ',            note: 'Instant bank transfer' },
-  { value: 'efawateercom', label: 'eFAWATEERcom',    note: 'Pay through your bank' },
-  { value: 'cod',          label: 'Cash on handover', note: 'Pay in person when you meet' },
+  { value: 'cod',  label: 'Cash on handover', note: 'Pay in person when you meet' },
+  { value: 'cliq', label: 'CliQ',             note: 'Instant bank transfer' },
 ];
 
 export const PHOTO_SLOTS = [

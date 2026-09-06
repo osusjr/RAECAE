@@ -4,6 +4,7 @@
 
 import {
   sb, loadSession, money, num, esc, publicUrl, empty, debounce, param, getSettings,
+  withTimeout,
 } from './sc-core.js';
 
 const PAGE = 24;
@@ -190,7 +191,7 @@ async function load(reset) {
   const cards = (data || []).map(l => {
     const photo = (l.images || []).filter(p => p.slot !== 'video')
       .sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0))[0];
-    const off = l.original_retail
+    const off = l.original_retail && l.original_retail > l.price
       ? Math.round((1 - l.price / l.original_retail) * 100) : 0;
     return `<a class="br-card" href="item.html?id=${esc(l.id)}">
       <div style="position:relative">
@@ -204,7 +205,8 @@ async function load(reset) {
       <p class="sc-xs sc-muted" style="margin-top:9px">${esc(l.brand?.name || l.custom_brand || '')}</p>
       <p class="sc-sm sc-truncate" style="font-weight:500;margin-top:2px">${esc(l.title)}</p>
       <p class="sc-sm sc-money" style="margin-top:3px">${money(l.price, state.currency)}
-        ${off > 0 ? `<span class="sc-xs" style="color:var(--sc-ok);margin-left:5px">${off}% off</span>` : ''}</p>
+        ${off > 0 ? `<span class="sc-xs" style="color:var(--color-muted);text-decoration:line-through;margin-inline-start:5px">${money(l.original_retail, state.currency)}</span>
+          <span class="sc-xs" style="color:var(--sc-ok);margin-inline-start:4px">${off}% off</span>` : ''}</p>
       ${l.condition ? `<p class="sc-xs sc-muted" style="margin-top:2px">${esc(l.condition.label)}</p>` : ''}
     </a>`;
   }).join('');

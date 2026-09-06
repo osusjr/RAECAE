@@ -6,9 +6,9 @@ import {
   sb, session, requireAuth, getSettings, signOut,
   money, num, date, ago, esc, badge, initials, titleCase,
   toast, modal, confirmAction, empty, errorMessage, publicUrl, param, setParam,
-  USERNAME_RE, USERNAME_RULE, cleanUsername, usernameTooSimilar,
+  USERNAME_RE, USERNAME_RULE, cleanUsername, usernameTooSimilar, compressImage,
 } from './sc-core.js';
-import { CITIES } from './config.js';
+import { CITIES, MAX_VIDEO_MB } from './config.js';
 
 let settings = null;
 let summary = null;
@@ -73,6 +73,24 @@ function renderTabs() {
     const btn = e.target.closest('[data-tab]');
     if (btn) show(btn.dataset.tab);
   });
+
+  // On narrow screens the tab bar scrolls; show an arrow and a fade so the
+  // hidden tabs are discoverable rather than silently cut off.
+  const wrap = host.closest('.acct-tabs-wrap');
+  const more = document.getElementById('acct-tabs-more');
+  if (!wrap || !more) return;
+  const sync = () => {
+    const overflowing = host.scrollWidth - host.clientWidth > 4;
+    const atEnd = Math.abs(host.scrollLeft) + host.clientWidth >= host.scrollWidth - 4;
+    wrap.classList.toggle('has-more', overflowing && !atEnd);
+  };
+  more.addEventListener('click', () => {
+    const dir = document.documentElement.dir === 'rtl' ? -1 : 1;
+    host.scrollBy({ left: 180 * dir, behavior: 'smooth' });
+  });
+  host.addEventListener('scroll', sync, { passive: true });
+  addEventListener('resize', sync);
+  sync();
 }
 
 async function show(key) {
@@ -251,7 +269,7 @@ async function renderSales() {
   return `
     <div class="sc-table-wrap"><table class="sc-table">
       <thead><tr><th>Order</th><th>Piece</th><th>Status</th>
-        <th class="sc-cell-num">Sold for</th><th class="sc-cell-num">Commission</th><th class="sc-cell-num">You get</th></tr></thead>
+        <th class="sc-cell-num">Sold for</th><th class="sc-cell-num">Platform fee</th><th class="sc-cell-num">You get</th></tr></thead>
       <tbody>${data.map(o => `<tr>
         <td><span class="sc-sm">${esc(o.order_no)}</span><br><span class="sc-xs sc-muted">${date(o.created_at)}</span></td>
         <td><p class="sc-sm sc-truncate" style="max-width:220px">${esc(o.listing?.title || '—')}</p>
@@ -375,7 +393,6 @@ async function renderSettings() {
           <dl class="sc-kv" style="margin-top:14px">
             <dt>Email</dt><dd>${esc(session.user.email)}</dd>
             <dt>Email verified</dt><dd>${p.email_verified ? 'Yes' : 'No'}</dd>
-            <dt>Email verified</dt><dd>${p.email_verified ? 'Yes' : 'No'}</dd>
             <dt>Identity</dt><dd>${p.identity_verified ? 'Verified' : 'Not submitted'}</dd>
           </dl>
           <div class="sc-row-tight" style="margin-top:16px">
@@ -447,7 +464,7 @@ function wire(tab, root) {
 
   root.querySelectorAll('[data-accept-order]').forEach(b => b.addEventListener('click', async () => {
     if (!await confirmAction('Accept this piece?',
-      'Accepting releases the payment to the seller and closes Buyer Protection on this order.',
+      'Accepting is final — no returns are approved after this. The payment, minus the platform fee, is released to the seller and Buyer Protection closes on this order.',
       'Accept')) return;
     const { error } = await sb.from('orders').update({ status: 'accepted' }).eq('id', b.dataset.acceptOrder);
     if (error) return toast(errorMessage(error), 'danger');
@@ -473,7 +490,7 @@ function wireSettings(root) {
     if (uname && !USERNAME_RE.test(uname))
       return toast(USERNAME_RULE, 'danger');
     if (usernameTooSimilar(uname, f.full_name || session.profile?.full_name))
-      return toast('Your username cannot be the same as your name — pick something distinct.', 'danger');
+      return toast('Your username cannot be your first, last or full name — pick something distinct.', 'danger');
     const { error } = await sb.from('profiles').update({
       full_name: f.full_name || null,
       username: uname.toLowerCase() || null,
@@ -498,7 +515,8 @@ function wireSettings(root) {
   root.querySelector('[data-change-password]')?.addEventListener('click', async () => {
     const result = await modal({
       title: 'Change password',
-      body: `<form class="sc-stack">
+      body: `<p class="sc-hint" style="margin-bottom:12px">At least 8 characters, up to 72. A longer phrase beats a complicated one.</p>
+      <form class="sc-stack">
         <div class="sc-field"><label class="sc-label">New password</label>
           <input class="sc-input" name="password" type="password" minlength="8" required></div>
         <div class="sc-field"><label class="sc-label">Confirm</label>
@@ -545,14 +563,31 @@ function wireSettings(root) {
 }
 
 // ---------------------------------------------------------------------------
-// Edit a listing after it exists. Review rules are enforced by the database:
-// a live listing cannot be changed in place, so saving one sends it back
-// through review; a rejected one moves to drafts for resubmission.
+// Edit a listing after it exists — text, price, condition and the photos.
+// Review rules are enforced by the database: a live listing cannot be changed
+// in place, so saving one sends it back through review; a rejected one moves
+// to drafts for resubmission. Photo changes are staged in the dialog and only
+// applied on Save, so cancelling leaves the listing exactly as it was.
+const MEDIA_EXT = {
+  'image/jpeg': 'jpg', 'image/png': 'png', 'image/webp': 'webp',
+  'video/mp4': 'mp4', 'video/quicktime': 'mov', 'video/webm': 'webm',
+};
+
 async function editListing(id) {
-  const { data: l, error: loadErr } = await sb.from('listings')
-    .select('id, title, price, original_retail, size_label, color, description, status')
-    .eq('id', id).single();
+  const [{ data: l, error: loadErr }, conditionsRes, colorsRes] = await Promise.all([
+    sb.from('listings')
+      .select('id, title, price, original_retail, size_label, color, description, status, condition_code, images:listing_images(id, storage_path, slot, sort_order)')
+      .eq('id', id).single(),
+    sb.from('conditions').select('code,label').eq('is_active', true).order('sort_order'),
+    sb.from('colors').select('name').eq('is_active', true).order('sort_order'),
+  ]);
   if (loadErr || !l) return toast('Could not load that listing.', 'danger');
+  const conditions = conditionsRes.data || [];
+  const colors = colorsRes.data || [];
+
+  const images = (l.images || []).sort((a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
+  const removals = new Set();   // listing_images ids marked for deletion
+  const additions = [];         // { file, isVideo } staged for upload
 
   const note =
     l.status === 'active'
@@ -561,24 +596,117 @@ async function editListing(id) {
         ? 'Saving moves it to your drafts; submit it again when it is ready.'
         : null;
 
+  const colourField = colors.length
+    ? `<select class="sc-select" name="color"><option value="">Choose one</option>
+         ${colors.some(c => c.name === l.color) || !l.color ? '' : `<option selected>${esc(l.color)}</option>`}
+         ${colors.map(c => `<option ${c.name === l.color ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
+       </select>`
+    : `<input class="sc-input" name="color" value="${esc(l.color || '')}">`;
+
   const result = await modal({
+    size: 'lg',
     title: 'Edit listing',
     body: `${note ? `<div class="sc-note sc-note-info" style="margin-bottom:14px">${esc(note)}</div>` : ''}
       <form class="sc-stack">
+        <div class="sc-field"><label class="sc-label">Photos and video</label>
+          <div data-media-grid style="display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px"></div>
+          <p class="sc-hint">Tap ✕ to remove one. New photos upload when you save.</p>
+          <div class="sc-row-tight" style="margin-top:8px;flex-wrap:wrap">
+            <label class="sc-btn sc-btn-ghost sc-btn-sm" style="cursor:pointer">Add photos
+              <input type="file" accept="image/jpeg,image/png,image/webp" multiple hidden data-add-photos></label>
+            <label class="sc-btn sc-btn-ghost sc-btn-sm" style="cursor:pointer" data-add-video-wrap>Add a video
+              <input type="file" accept="video/mp4,video/quicktime,video/webm" hidden data-add-video></label>
+          </div></div>
         <div class="sc-field"><label class="sc-label">Model or description</label>
           <input class="sc-input" name="title" required value="${esc(l.title || '')}"></div>
+        <div class="sc-field"><label class="sc-label">Condition</label>
+          <select class="sc-select" name="condition_code">
+            <option value="">Choose one</option>
+            ${conditions.map(c => `<option value="${esc(c.code)}" ${c.code === l.condition_code ? 'selected' : ''}>${esc(c.label)}</option>`).join('')}
+          </select></div>
         <div class="sc-field"><label class="sc-label">Asking price</label>
           <input class="sc-input" name="price" inputmode="decimal" required value="${esc(l.price ?? '')}"></div>
-        <div class="sc-field"><label class="sc-label">Original retail <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Original retail</label>
           <input class="sc-input" name="original_retail" inputmode="decimal" value="${esc(l.original_retail ?? '')}"></div>
-        <div class="sc-field"><label class="sc-label">Size <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Size</label>
           <input class="sc-input" name="size_label" value="${esc(l.size_label || '')}"></div>
-        <div class="sc-field"><label class="sc-label">Colour <span class="sc-muted sc-xs">optional</span></label>
-          <input class="sc-input" name="color" value="${esc(l.color || '')}"></div>
-        <div class="sc-field"><label class="sc-label">Notes for buyers <span class="sc-muted sc-xs">optional</span></label>
+        <div class="sc-field"><label class="sc-label">Colour</label>
+          ${colourField}</div>
+        <div class="sc-field"><label class="sc-label">Notes for buyers</label>
           <textarea class="sc-textarea" name="description">${esc(l.description || '')}</textarea></div>
       </form>`,
     actions: [{ label: 'Cancel', value: false }, { label: 'Save changes', value: true, kind: 'sc-btn-primary' }],
+    onMount(dialog) {
+      const grid = dialog.querySelector('[data-media-grid]');
+      const videoWrap = dialog.querySelector('[data-add-video-wrap]');
+
+      const photoCount = () =>
+        images.filter(i => i.slot !== 'video' && !removals.has(i.id)).length
+        + additions.filter(a => !a.isVideo).length;
+      const hasVideo = () =>
+        images.some(i => i.slot === 'video' && !removals.has(i.id))
+        || additions.some(a => a.isVideo);
+
+      const draw = () => {
+        const tile = (inner, onRemove) => {
+          const cell = document.createElement('div');
+          cell.style.cssText = 'position:relative;aspect-ratio:1/1.15;border-radius:10px;overflow:hidden;background:var(--color-product)';
+          cell.innerHTML = inner + `<button type="button" aria-label="Remove"
+            style="position:absolute;top:5px;right:5px;width:24px;height:24px;border:0;border-radius:999px;
+                   background:rgba(16,17,20,.78);color:#fff;cursor:pointer;font-size:12px;line-height:1">✕</button>`;
+          cell.querySelector('button').addEventListener('click', onRemove);
+          return cell;
+        };
+        grid.innerHTML = '';
+        for (const img of images) {
+          if (removals.has(img.id)) continue;
+          const url = esc(publicUrl('listing-photos', img.storage_path));
+          grid.appendChild(tile(
+            img.slot === 'video'
+              ? `<video src="${url}" muted playsinline style="width:100%;height:100%;object-fit:cover"></video>`
+              : `<img src="${url}" alt="" style="width:100%;height:100%;object-fit:cover">`,
+            () => { removals.add(img.id); draw(); }));
+        }
+        for (const add of additions) {
+          const url = URL.createObjectURL(add.file);
+          grid.appendChild(tile(
+            add.isVideo
+              ? `<video src="${url}" muted playsinline style="width:100%;height:100%;object-fit:cover"></video>`
+              : `<img src="${url}" alt="" style="width:100%;height:100%;object-fit:cover">`,
+            () => { additions.splice(additions.indexOf(add), 1); draw(); }));
+        }
+        videoWrap.hidden = hasVideo();
+      };
+
+      dialog.querySelector('[data-add-photos]').addEventListener('change', async e => {
+        for (const raw of [...(e.target.files || [])]) {
+          if (photoCount() >= 10) { toast('Ten photos is the limit.', 'danger'); break; }
+          const file = await compressImage(raw);
+          if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+            toast('Photos need to be JPG, PNG or WEBP.', 'danger'); continue;
+          }
+          if (file.size > 10 * 1024 * 1024) { toast('That photo is over 10 MB.', 'danger'); continue; }
+          additions.push({ file, isVideo: false });
+        }
+        e.target.value = '';
+        draw();
+      });
+
+      dialog.querySelector('[data-add-video]').addEventListener('change', e => {
+        const file = e.target.files?.[0];
+        e.target.value = '';
+        if (!file) return;
+        if (hasVideo()) return toast('One video per listing.', 'danger');
+        if (!['video/mp4', 'video/quicktime', 'video/webm'].includes(file.type))
+          return toast('Videos need to be MP4, MOV or WEBM.', 'danger');
+        if (file.size > MAX_VIDEO_MB * 1024 * 1024)
+          return toast(`That video is over ${MAX_VIDEO_MB} MB.`, 'danger');
+        additions.push({ file, isVideo: true });
+        draw();
+      });
+
+      draw();
+    },
   });
   if (result?.value !== true) return;
 
@@ -586,6 +714,16 @@ async function editListing(id) {
   const price = parseFloat(String(v.price).replace(/[^\d.]/g, ''));
   if (!v.title?.trim()) return toast('The listing needs a title.', 'danger');
   if (!price || price <= 0) return toast('Set a valid asking price.', 'danger');
+  // Everything on a listing is required, matching the sell form.
+  if (!v.condition_code) return toast('Choose a condition.', 'danger');
+  if (!v.size_label?.trim()) return toast('Add the size as marked on the item.', 'danger');
+  if (!v.color?.trim()) return toast('Pick a colour.', 'danger');
+  if (!v.description?.trim()) return toast('Tell buyers a little more in the notes.', 'danger');
+  if (!parseFloat(String(v.original_retail).replace(/[^\d.]/g, '')))
+    return toast('Add the original retail price.', 'danger');
+  if (images.filter(i => i.slot !== 'video' && !removals.has(i.id)).length
+      + additions.filter(a => !a.isVideo).length === 0)
+    return toast('Keep at least one photo on the listing.', 'danger');
 
   const nextStatus =
     l.status === 'active' ? 'pending_review'
@@ -598,14 +736,50 @@ async function editListing(id) {
     original_retail: parseFloat(String(v.original_retail).replace(/[^\d.]/g, '')) || null,
     size_label: v.size_label?.trim() || null,
     color: v.color?.trim() || null,
+    condition_code: v.condition_code || null,
     description: v.description?.trim() || null,
     status: nextStatus,
   }).eq('id', id);
   if (error) return toast(errorMessage(error), 'danger');
 
-  toast(l.status === 'active' ? 'Saved — it is back in the review queue.'
-    : l.status === 'rejected' ? 'Saved to your drafts.'
-    : 'Saved.', 'ok');
+  // Apply the staged photo changes. The listing row is already saved, so a
+  // media failure is reported but does not lose the rest of the edit.
+  let mediaProblem = null;
+  if (removals.size) {
+    const gone = images.filter(i => removals.has(i.id));
+    const { error: delErr } = await sb.from('listing_images').delete().in('id', [...removals]);
+    if (delErr) mediaProblem = delErr;
+    else sb.storage.from('listing-photos').remove(gone.map(i => i.storage_path)).then(() => {}, () => {});
+  }
+  if (additions.length && !mediaProblem) {
+    const baseOrder = Math.max(0, ...images.map(i => i.sort_order ?? 0)) + 1;
+    try {
+      const rows = await Promise.all(additions.map(async (add, i) => {
+        const ext = MEDIA_EXT[add.file.type] || (add.isVideo ? 'mp4' : 'jpg');
+        const path = `${session.user.id}/${id}/${add.isVideo ? 'video' : `extra-${Date.now()}-${i}`}.${ext}`;
+        const { error: upErr } = await sb.storage.from('listing-photos')
+          .upload(path, add.file, { upsert: true, contentType: add.file.type });
+        if (upErr) throw upErr;
+        return {
+          listing_id: id, storage_path: path,
+          slot: add.isVideo ? 'video' : 'extra',
+          sort_order: add.isVideo ? 99 : baseOrder + i,
+        };
+      }));
+      const { error: insErr } = await sb.from('listing_images').insert(rows);
+      if (insErr) throw insErr;
+    } catch (err) {
+      mediaProblem = err;
+    }
+  }
+
+  if (mediaProblem) {
+    toast('Saved the details, but the photo changes failed: ' + errorMessage(mediaProblem), 'danger');
+  } else {
+    toast(l.status === 'active' ? 'Saved — it is back in the review queue.'
+      : l.status === 'rejected' ? 'Saved to your drafts.'
+      : 'Saved.', 'ok');
+  }
   show('listings');
 }
 

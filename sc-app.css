@@ -114,8 +114,8 @@
 
 /* ---------- forms ---------- */
 .sc-field { display: block; }
-.sc-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 6px; }
-.sc-hint { font-size: 12px; color: var(--color-muted); margin-top: 5px; }
+.sc-label { display: block; font-size: 13px; font-weight: 500; margin-bottom: 8px; }
+.sc-hint { font-size: 12px; color: var(--color-muted); margin-top: 6px; line-height: 1.5; }
 .sc-req { color: var(--color-accent); }
 
 .sc-input, .sc-select, .sc-textarea {

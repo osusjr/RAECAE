@@ -73,15 +73,15 @@
             <input class="sc-input" id="su-phone" name="phone" type="tel" required
                    autocomplete="tel" inputmode="numeric" placeholder="079 123 4567"></div>
           <p class="sc-hint">Buyers use it to reach you after a sale.</p></div>
+        <p class="sc-hint" style="margin-bottom:-6px">Your password needs at least 8 characters (up to 72). A longer phrase beats a complicated one.</p>
         <div class="sc-grid sc-grid-2">
           <div class="sc-field"><label class="sc-label" for="su-pw">Password</label>
             <input class="sc-input" id="su-pw" name="password" type="password"
-                   minlength="8" required autocomplete="new-password"></div>
+                   minlength="8" maxlength="72" required autocomplete="new-password"></div>
           <div class="sc-field"><label class="sc-label" for="su-pw2">Confirm password</label>
             <input class="sc-input" id="su-pw2" name="confirm" type="password"
-                   required autocomplete="new-password"></div>
+                   maxlength="72" required autocomplete="new-password"></div>
         </div>
-        <p class="sc-hint" style="margin-top:-6px">At least 8 characters. Longer beats complicated.</p>
         <div class="sc-field"><label class="sc-label" for="su-user">Username
           <span class="sc-muted sc-xs">optional</span></label>
           <input class="sc-input" id="su-user" name="username" autocomplete="username" maxlength="20">
