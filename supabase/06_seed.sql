@@ -142,15 +142,14 @@ insert into content_pages (slug, title, body, status, published_at) values
 on conflict (slug) do nothing;
 
 insert into content_blocks (key, label, value, block_type) values
-('homepage_hero_title','Homepage hero title','Buy and sell authenticated pre-owned luxury in Jordan','text'),
-('homepage_hero_subtitle','Homepage hero subtitle','Authenticated, protected, and priced by the people who own it.','text'),
-('announcement_bar','Announcement bar','Every piece over JOD 350 is authenticated before it reaches you.','text'),
+('homepage_hero_title','Homepage hero title','A Second Chance for pieces worth finding','text'),
+('homepage_hero_subtitle','Homepage hero subtitle','Jordan''s buy-and-sell fashion marketplace.','text'),
+('announcement_bar','Announcement bar','Payment protected until you accept the piece.','text'),
 ('sell_cta','Sell page call to action','Free to list, and no seller fees on your first three sales.','text'),
 ('footer_note','Footer note','Jordan''s marketplace for pre-owned luxury.','text')
 on conflict (key) do nothing;
 
 insert into faqs (question, answer, category, sort_order) values
-('How does authentication work?','Anything priced over JOD 350 is collected and checked by our authenticators in Amman before it goes to the buyer.','authentication',1),
 ('What does it cost to sell?','Listing is free. A 12% platform fee is deducted when the buyer accepts the item.','fees',2),
 ('How do I get paid?','Once the buyer accepts, your payout is scheduled and sent by bank transfer or CliQ.','payouts',3),
 ('Can I return something?','Yes, if the item is not as described — open a return from your order within 3 days of the handover. Once you accept a piece, the sale is final.','returns',4),
