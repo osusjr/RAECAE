@@ -268,8 +268,6 @@ async function checkout() {
 
         <div class="sc-note sc-note-info">
           Your payment is held until the piece reaches you and you accept it.
-          ${listing.price >= Number(settings.authentication_threshold || 350)
-            ? ' This piece is authenticated in Amman before the handover, which adds a day or two.' : ''}
         </div>
       </form>`,
     actions: [
@@ -298,9 +296,7 @@ async function checkout() {
   await modal({
     title: 'Order placed',
     body: `<p class="sc-lead">
-        We have told the seller.${listing.price >= Number(settings.authentication_threshold || 350)
-          ? ' The piece goes to our authenticators in Amman first, then you arrange the handover between you.'
-          : ' You can arrange the handover between you now.'}
+        We have told the seller. You can arrange the handover between you now.
       </p>
       <p class="sc-lead" style="margin-top:10px">
         You will get updates at every step, and your payment stays protected until you accept it.</p>`,
