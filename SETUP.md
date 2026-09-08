@@ -64,6 +64,7 @@ Open **SQL Editor** in the Supabase dashboard. Run the files in `supabase/`
 | 10 | `10_fix_signup_columns.sql` | Adds the `profiles.email` column that 08/09 assumed — **sign-up fails with "Database error saving new user" until this runs** |
 | 11 | `11_brands_and_media.sql` | Typed brands on listings, 48 more seeded brands, a video slot, and the bucket config for video (50 MB) |
 | 12 | `12_copy_platform_fees.sql` | Wording refresh in seeded FAQs: "platform fee" instead of "commission", 3-day returns, CliQ + cash only |
+| 13 | `13_remove_authentication_claims.sql` | Drops the authentication FAQ, refreshes seeded hero/announcement copy, and parks the authentication threshold so nothing new enters that queue |
 
 Paste the whole file each time and press **Run**. Green means it worked.
 
@@ -341,7 +342,6 @@ page cannot change what the platform takes. The defaults match your existing cop
 
 - 12% platform fee, taken from the seller
 - Buyer Protection charged on top, paid by the buyer
-- Authentication required at JOD 350 and above
 - Payouts scheduled 3 days after the buyer accepts
 
 All of these are editable in **Admin → Settings** and take effect immediately.

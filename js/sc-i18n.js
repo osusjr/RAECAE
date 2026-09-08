@@ -56,6 +56,13 @@ const AR = {
   // --- homepage ----------------------------------------------------------
   'A Second Chance for pieces worth finding.': 'فرصة ثانية لقطعٍ تستحق العثور عليها.',
   'Jordan’s buy-and-sell fashion marketplace.': 'سوق الأردن لبيع وشراء الأزياء.',
+  'A Second Chance for pieces worth finding. Jordan’s buy-and-sell fashion marketplace.':
+    'فرصة ثانية لقطعٍ تستحق العثور عليها. سوق الأردن لبيع وشراء الأزياء.',
+  'Protected from payment to handover.': 'محميّ من الدفع حتى التسليم.',
+  'Your payment is held': 'دفعتك محفوظة',
+  'Handover between you': 'التسليم بينكما',
+  'How Buyer Protection works': 'كيف تعمل حماية المشتري',
+  'Buying safely': 'الشراء بأمان',
   'Just listed': 'أُضيفت للتو',
   'Nothing counterfeit gets through.': 'لا مجال للتقليد.',
   'pieces authenticated': 'قطعة موثّقة',
@@ -243,8 +250,6 @@ const AR = {
   'Refunded': 'مستردّة',
 
   // --- picked up from a coverage sweep of the exported pages -------------
-  'Every piece over JOD 350 is authenticated before it reaches you.':
-    'كل قطعة تتجاوز ٣٥٠ دينارًا موثّقة قبل أن تصلك.',
   'One size': 'مقاس واحد',
   'No reduction': 'بدون تخفيض',
   'Refine your search': 'حسّن بحثك',

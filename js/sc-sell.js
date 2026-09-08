@@ -351,7 +351,6 @@ function wirePayoutPreview(form) {
       box.style.marginBottom = '16px';
       aside.prepend(box);
     }
-    const needsAuth = value >= Number(settings.authentication_threshold || 350);
     box.innerHTML = `
       <p class="sc-eyebrow">On this price</p>
       <dl class="sc-kv" style="margin-top:10px">
@@ -359,9 +358,7 @@ function wirePayoutPreview(form) {
         <dt>Platform fee (${(rate * 100).toFixed(0)}%)</dt><dd class="sc-money">− ${money(commission, settings.currency)}</dd>
         <dt>You receive</dt><dd class="sc-money-lg" style="color:var(--color-accent)">${money(takeHome, settings.currency)}</dd>
       </dl>
-      <p class="sc-hint" style="margin-top:10px">${needsAuth
-        ? 'Over the authentication threshold, so it is checked in Amman before the handover.'
-        : 'Under the authentication threshold. You hand it to the buyer directly.'}</p>`;
+      <p class="sc-hint" style="margin-top:10px">You hand it to the buyer directly, and the payout is released once they accept.</p>`;
   };
 
   price.addEventListener('input', update);
@@ -405,7 +402,7 @@ function validate(data, { draft }) {
     if (!files.has('front')) problems.push('Add the front photo.');
     if (!files.has('back')) problems.push('Add the back photo.');
     if (!files.has('detail')) problems.push('Add the detail photo.');
-    if (!files.has('label')) problems.push('Add the label photo — authentication starts from it.');
+    if (!files.has('label')) problems.push('Add the label photo — buyers look for it first.');
   }
   return problems;
 }

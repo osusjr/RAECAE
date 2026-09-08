@@ -23,7 +23,7 @@ const CATEGORIES = [
 
 const HELP = [
   ['How it works', 'about.html'],
-  ['Authentication', 'authentication.html'],
+  ['Buying safely', 'authentication.html'],
   ['Buyer Protection', 'help-buyer-protection.html'],
   ['Help centre', 'help-centre.html'],
 ];
