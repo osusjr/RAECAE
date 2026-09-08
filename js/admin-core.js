@@ -409,7 +409,7 @@ async function openListing(id, ctx, reload) {
 // 4. AUTHENTICATION / QUALITY CONTROL
 // ---------------------------------------------------------------------------
 async function verification({ setContent, setTitle, ctx }) {
-  setTitle('Authentication', `Everything priced over ${money(ctx.settings?.authentication_threshold, cur(ctx))} is checked before it changes hands`);
+  setTitle('Authentication', 'Recorded checks for listings flagged for review');
 
   const tabs = [
     { value: 'pending', label: 'Waiting', active: true, count: ctx.counts.pending_auth },
@@ -442,7 +442,7 @@ async function verification({ setContent, setTitle, ctx }) {
       columns: [{ label: 'Piece' }, { label: 'Seller' }, { label: 'Value', align: 'right' },
                 { label: 'Status' }, { label: 'Certificate' }, { label: '' }],
       emptyTitle: 'Nothing waiting',
-      emptyText: 'Items appear here once they are priced above the authentication threshold.',
+      emptyText: 'Items appear here when a listing is flagged for a check.',
       rows: (data || []).map(l => {
         const front = l.images?.find(i => i.slot === 'front') || l.images?.[0];
         const check = l.checks?.[0];
